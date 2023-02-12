@@ -1,3 +1,4 @@
 # BayesMultiview
 
-The repository contains the codes from the Bayes multiview project.
+The repository contains the analysis and simulation codes from the Bayesian multiview project.
+
