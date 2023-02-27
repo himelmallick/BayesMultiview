@@ -150,8 +150,7 @@ trigger_InterSIM<-function(n){
 
 
 # Test Run
-DD<-gen_simmba(nsample = 200, nrep = 2)
-all(colnames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_1$sample_metadata))
-all(colnames(DD$trainDat$Rep_2$feature_table)==rownames(DD$trainDat$Rep_2$sample_metadata))
-all(rownames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_2$feature_tablea))
-nsample
+# DD<-gen_simmba(nsample = 200, nrep = 2)
+# all(colnames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_1$sample_metadata))
+# all(colnames(DD$trainDat$Rep_2$feature_table)==rownames(DD$trainDat$Rep_2$sample_metadata))
+# all(rownames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_2$feature_tablea))
