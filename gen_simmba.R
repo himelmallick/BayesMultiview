@@ -11,7 +11,7 @@ library(InterSIM)
 library(tidyverse)
 library(splatter) # Bioconductor package if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager"); BiocManager::install("splatter")
 
-gen_simmba<-function(nsamples, # Sample size
+gen_simmba<-function(nsample, # Sample size
                      snr = 1, # Signal to noise ratio
                      p.train = 0.7, # Train-test split
                      de.prob = 0.1, # DE probability across all modalities
@@ -33,7 +33,7 @@ gen_simmba<-function(nsamples, # Sample size
   for (k in 1:nrep){
     
     # Generate X 
-    pcl<-trigger_InterSIM(n = nsamples)
+    pcl<-trigger_InterSIM(n = nsample)
     X<-pcl$feature_table %>% t() %>% as.matrix()
     
     # Initialize coefficients
@@ -54,14 +54,14 @@ gen_simmba<-function(nsamples, # Sample size
     sigma2 = as.vector(var(mu)/snr)
     
     # Generate Y
-    Y = X%*%beta0 + rnorm(nsamples)*sigma2 
+    Y = X%*%beta0 + rnorm(nsample)*sigma2 
   
     # Insert Y into the simulated datasets
     pcl$sample_metadata$Y<-as.vector(Y)
     
     # Training / test set splitting
     train<-test<-pcl
-    tr.row <- sample(1L:nsamples, round(nsamples * p.train), replace = FALSE)
+    tr.row <- sample(1L:nsample, round(nsample * p.train), replace = FALSE)
     train$sample_metadata<-pcl$sample_metadata[tr.row, , drop = FALSE]
     test$sample_metadata<-pcl$sample_metadata[-tr.row, , drop = FALSE]
     train$feature_table<-pcl$feature_table[, tr.row, drop = FALSE]
@@ -150,7 +150,8 @@ trigger_InterSIM<-function(n){
 
 
 # Test Run
-DD<-gen_simmba(nsamples = 200, nrep = 2)
+DD<-gen_simmba(nsample = 200, nrep = 2)
 all(colnames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_1$sample_metadata))
 all(colnames(DD$trainDat$Rep_2$feature_table)==rownames(DD$trainDat$Rep_2$sample_metadata))
 all(rownames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_2$feature_tablea))
+nsample
