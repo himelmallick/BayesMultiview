@@ -5,14 +5,14 @@
 # Simulates three inter-connected omics layers using InterSIM
 # Always generates 658 features: gene expression (131), methylation (367), and protein (160)
 # Generates realistic effect sizes from log-normal distribution using Splatter
-# SNR is used to control the signal to noise ratio
+# snr is used to control the signal to noise ratio
 
 library(InterSIM)
 library(tidyverse)
 library(splatter) # Bioconductor package if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager"); BiocManager::install("splatter")
 
 gen_simmba<-function(nsamples, # Sample size
-                     SNR = 1, # Signal to noise ratio
+                     snr = 1, # Signal to noise ratio
                      p.train = 0.7, # Train-test split
                      de.prob = 0.1, # DE probability across all modalities
                      de.downProb = 0.5, # Down-regulation probability
@@ -49,9 +49,9 @@ gen_simmba<-function(nsamples, # Sample size
     # Convert to LFCs
     beta0<-log2(de.facs) # Assuming LFC is log-normally distributed
     
-    # Back-calculate residual sigma2 based on beta0 and SNR
+    # Back-calculate residual sigma2 based on beta0 and snr
     mu = as.matrix(X)%*%beta0
-    sigma2 = as.vector(var(mu)/SNR)
+    sigma2 = as.vector(var(mu)/snr)
     
     # Generate Y
     Y = X%*%beta0 + rnorm(nsamples)*sigma2 
@@ -76,7 +76,7 @@ gen_simmba<-function(nsamples, # Sample size
   # Return synthetic data and simulation parameters
   return(list(trainDat = trainDat,
               testDat = testDat,
-              SNR = SNR,
+              snr = snr,
               p.train = p.train,
               de.prob = de.prob,
               de.downProb = de.downProb, 
@@ -144,7 +144,7 @@ trigger_InterSIM<-function(n){
   
 }
 
-# Inspiration for SNR calculation
+# Inspiration for snr calculation
 # https://github.com/dingdaisy/cooperative-learning/
 # https://github.com/nanxstats/msaenet
 
