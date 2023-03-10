@@ -54,7 +54,7 @@ gen_simmba<-function(nsample, # Sample size
     sigma2 = as.vector(var(mu)/snr)
     
     # Generate Y
-    Y = X%*%beta0 + rnorm(nsample)*sigma2 
+    Y = X%*%beta0 + rnorm(nsample)*sqrt(sigma2)
   
     # Insert Y into the simulated datasets
     pcl$sample_metadata$Y<-as.vector(Y)
