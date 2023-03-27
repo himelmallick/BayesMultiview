@@ -14,10 +14,11 @@ library(splatter) # Bioconductor package if (!require("BiocManager", quietly = T
 gen_simmba<-function(nsample, # Sample size
                      snr = 1, # Signal to noise ratio
                      p.train = 0.7, # Train-test split
-                     de.prob = 0.1, # DE probability across all modalities
-                     de.downProb = 0.5, # Down-regulation probability
-                     de.facLoc = 1, # DE factor location 
-                     de.facScale = 0.4, # DE factor scale
+                     de.prob = rep(0.1,3), # DE probability across all modalities (vector)
+                     de.downProb = rep(0.5,3), # Down-regulation probability (vector)
+                     de.facLoc = rep(1, 3), # DE factor location (vector)
+                     de.facScale = rep(0.4, 3), # DE factor scale (vector)
+                     ygen.mode = 'LM', # Y generation (default is linear model) 
                      nrep = 100, 
                      seed = 1234){
                          
@@ -37,24 +38,33 @@ gen_simmba<-function(nsample, # Sample size
     X<-pcl$feature_table %>% t() %>% as.matrix()
     
     # Initialize coefficients
-    nfeature<-ncol(X)
+    nfeature<- table(pcl$feature_metadata$featureType)
     
     # Generate realistic effect sizes using Splatter
-    de.facs <- splatter:::getLNormFactors(n.facs = nfeature, 
-                                          sel.prob = de.prob, 
-                                          neg.prob = de.downProb,
-                                          fac.loc = de.facLoc, 
-                                          fac.scale = de.facScale)
+    de.facs<-vector("list", 3)
+    for (i in 1:3){ 
+      de.facs[[i]] <- splatter:::getLNormFactors(n.facs = nfeature[i], 
+                                            sel.prob = de.prob[i], 
+                                            neg.prob = de.downProb[i],
+                                            fac.loc = de.facLoc[i], 
+                                            fac.scale = de.facScale[i])
+      
+    }
+
     
     # Convert to LFCs
-    beta0<-log2(de.facs) # Assuming LFC is log-normally distributed
+    beta0<-log2(unlist(de.facs)) # Assuming LFC is log-normally distributed
     
     # Back-calculate residual sigma2 based on beta0 and snr
     mu = as.matrix(X)%*%beta0
     sigma2 = as.vector(var(mu)/snr)
     
-    # Generate Y
-    Y = X%*%beta0 + rnorm(nsample)*sqrt(sigma2)
+    # Generate Y using a linear model
+    if (ygen.mode=='LM'){
+      Y = X%*%beta0 + rnorm(nsample)*sqrt(sigma2)
+    } else{
+      stop('Non-LM spike in is not yet implemented')
+    }
   
     # Insert Y into the simulated datasets
     pcl$sample_metadata$Y<-as.vector(Y)
