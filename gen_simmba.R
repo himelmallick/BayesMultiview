@@ -18,7 +18,7 @@ gen_simmba<-function(nsample, # Sample size
                      de.downProb = rep(0.5,3), # Down-regulation probability (vector)
                      de.facLoc = rep(1, 3), # DE factor location (vector)
                      de.facScale = rep(0.4, 3), # DE factor scale (vector)
-                     ygen.mode = 'LM', # Y generation (default is linear model) 
+                     ygen.mode = 'Friedman', # Y generation (default is non-linear model) 
                      nrep = 100, 
                      seed = 1234){
                          
@@ -60,10 +60,22 @@ gen_simmba<-function(nsample, # Sample size
     sigma2 = as.vector(var(mu)/snr)
     
     # Generate Y using a linear model
+    
     if (ygen.mode=='LM'){
+      
       Y = X%*%beta0 + rnorm(nsample)*sqrt(sigma2)
-    } else{
-      stop('Non-LM spike in is not yet implemented')
+      
+    } else if (ygen.mode=='Friedman'){
+      
+      # Randomly generate 5 betas to induce non-linear effects
+      nonzero_index<-which(beta0==0)
+      friedman_index<-sample(nonzero_index, 5)
+      X.friedman<-X[, friedman_index]
+      Xbeta.friedman = f(X.friedman)
+      Y = X%*%beta0 + Xbeta.friedman + rnorm(nsample)*sqrt(sigma2)
+      
+      } else{
+        stop('Either use `LM` for linear effects or `Friedman` non-linear effects')
     }
   
     # Insert Y into the simulated datasets
@@ -154,13 +166,17 @@ trigger_InterSIM<-function(n){
   
 }
 
+f = function(x) # Only the first 5 matter
+  10*sin(pi*x[ , 1]*x[ , 2]) + 20*(x[ , 3]-.5)^2+10*x[ , 4]+5*x[ , 5]
+
 # Inspiration for snr calculation
 # https://github.com/dingdaisy/cooperative-learning/
 # https://github.com/nanxstats/msaenet
 
 
 # Test Run
-# DD<-gen_simmba(nsample = 200, nrep = 2)
+# DD<-gen_simmba(nsample = 200, nrep = 2, ygen.mode = 'LM')
+# DD<-gen_simmba(nsample = 200, nrep = 2, ygen.mode = 'Friedman')
 # all(colnames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_1$sample_metadata))
 # all(colnames(DD$trainDat$Rep_2$feature_table)==rownames(DD$trainDat$Rep_2$sample_metadata))
 # all(rownames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_2$feature_tablea))
