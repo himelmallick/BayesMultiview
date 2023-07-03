@@ -71,8 +71,7 @@ gen_simmba<-function(nsample, # Sample size
       Xbeta.friedman = f(X)
       Y = Xbeta.friedman + rnorm(nsample)*sqrt(sigma2)
 
-    }
-      else if (ygen.mode=='Friedman2'){
+    } else if (ygen.mode=='Friedman2'){
       
       # Randomly generate 5 betas to induce non-linear effects
       nonzero_index<-which(beta0==0)
