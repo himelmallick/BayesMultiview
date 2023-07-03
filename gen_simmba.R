@@ -18,7 +18,7 @@ gen_simmba<-function(nsample, # Sample size
                      de.downProb = rep(0.5,3), # Down-regulation probability (vector)
                      de.facLoc = rep(1, 3), # DE factor location (vector)
                      de.facScale = rep(0.4, 3), # DE factor scale (vector)
-                     ygen.mode = 'Friedman', # Y generation (default is non-linear model based on Friedman function from various BART papers) 
+                     ygen.mode = 'Friedman', # Y generation (see notes below) 
                      nrep = 100, 
                      seed = 1234){
                          
@@ -67,6 +67,13 @@ gen_simmba<-function(nsample, # Sample size
       
     } else if (ygen.mode=='Friedman'){
       
+      # No additional effects
+      Xbeta.friedman = f(X)
+      Y = Xbeta.friedman + rnorm(nsample)*sqrt(sigma2)
+
+    }
+      else if (ygen.mode=='Friedman2'){
+      
       # Randomly generate 5 betas to induce non-linear effects
       nonzero_index<-which(beta0==0)
       friedman_index<-sample(nonzero_index, 5)
@@ -75,7 +82,7 @@ gen_simmba<-function(nsample, # Sample size
       Y = X%*%beta0 + Xbeta.friedman + rnorm(nsample)*sqrt(sigma2)
       
       } else{
-        stop('Either use `LM` for linear effects or `Friedman` non-linear effects')
+        stop('Use `LM` for linear effects and `Friedman` or ``Friedman`` for non-linear effects')
     }
   
     # Insert Y into the simulated datasets
@@ -170,6 +177,11 @@ trigger_InterSIM<-function(n){
 f = function(x) # Only the first 5 matter
   10*sin(pi*x[ , 1]*x[ , 2]) + 20*(x[ , 3]-.5)^2+10*x[ , 4]+5*x[ , 5]
 
+# NOTES ON Y generation
+# Fully linear (LM)
+# Fully Friedman (Friedman, Default)
+# Mixture of linear and Friedman (Friedman2)
+
 # Inspiration for snr calculation
 # https://github.com/dingdaisy/cooperative-learning/
 # https://github.com/nanxstats/msaenet
@@ -178,6 +190,7 @@ f = function(x) # Only the first 5 matter
 # Test Run
 # DD<-gen_simmba(nsample = 200, nrep = 2, ygen.mode = 'LM')
 # DD<-gen_simmba(nsample = 200, nrep = 2, ygen.mode = 'Friedman')
+# DD<-gen_simmba(nsample = 200, nrep = 2, ygen.mode = 'Friedman2')
 # all(colnames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_1$sample_metadata))
 # all(colnames(DD$trainDat$Rep_2$feature_table)==rownames(DD$trainDat$Rep_2$sample_metadata))
 # all(rownames(DD$trainDat$Rep_1$feature_table)==rownames(DD$trainDat$Rep_2$feature_tablea))
