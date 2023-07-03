@@ -5,7 +5,7 @@
 # Simulates three inter-connected omics layers using InterSIM
 # Always generates 658 features: gene expression (131), methylation (367), and protein (160)
 # Generates realistic effect sizes from log-normal distribution using Splatter
-# snr is used to control the signal to noise ratio
+# snr is used to control the signal-to-noise ratio
 
 library(InterSIM)
 library(tidyverse)
@@ -18,7 +18,7 @@ gen_simmba<-function(nsample, # Sample size
                      de.downProb = rep(0.5,3), # Down-regulation probability (vector)
                      de.facLoc = rep(1, 3), # DE factor location (vector)
                      de.facScale = rep(0.4, 3), # DE factor scale (vector)
-                     ygen.mode = 'Friedman', # Y generation (default is non-linear model) 
+                     ygen.mode = 'Friedman', # Y generation (default is non-linear model based on Friedman function from various BART papers) 
                      nrep = 100, 
                      seed = 1234){
                          
@@ -166,6 +166,7 @@ trigger_InterSIM<-function(n){
   
 }
 
+# Friedman function (https://rdrr.io/cran/BART/src/demo/friedman.wbart.R)
 f = function(x) # Only the first 5 matter
   10*sin(pi*x[ , 1]*x[ , 2]) + 20*(x[ , 3]-.5)^2+10*x[ , 4]+5*x[ , 5]
 
