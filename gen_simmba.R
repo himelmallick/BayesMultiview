@@ -67,8 +67,11 @@ gen_simmba<-function(nsample, # Sample size
       
     } else if (ygen.mode=='Friedman'){
       
-      # No additional effects
-      Xbeta.friedman = f(X)
+      # Make sure to randomize the coefficients
+      nonzero_index<-which(beta0==0)
+      friedman_index<-sample(nonzero_index, 5)
+      X.friedman<-X[, friedman_index]
+      Xbeta.friedman = f(X.friedman)
       Y = Xbeta.friedman + rnorm(nsample)*sqrt(sigma2)
 
     } else if (ygen.mode=='Friedman2'){
