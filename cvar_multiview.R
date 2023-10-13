@@ -15,7 +15,9 @@ cvar.multiview<-function(x_list,
                          rho = c(0, 0.1, 0.25, 0.5, 1, 5, 10), 
                          family = gaussian(), 
                          seed = 1234,
-                         lambda.choice = 'lambda.min')
+                         type.measure = 'deviance',
+                         lambda.choice = 'lambda.min', 
+                         verbose = TRUE)
 {
   
   ################################
@@ -30,7 +32,7 @@ cvar.multiview<-function(x_list,
   ####################################
   
   alpha_rho<-apply(expand.grid(alpha, rho), 1, paste, collapse="_")
-  a1<-lapply(alpha_rho, .cvfunc, xmat = x_list, ymat = y, foldid = foldid, family = family)
+  a1<-lapply(alpha_rho, .cvfunc, xmat = x_list, ymat = y, foldid = foldid, family = family, type.measure = type.measure, verbose = verbose)
   DD <- plyr::ldply(a1, extractMultiviewInfo)
   DD$alpha<-as.numeric(sapply(strsplit(alpha_rho, '_'), "[[" , 1))
   DD$rho<-as.numeric(sapply(strsplit(alpha_rho, '_'), "[[" , 2))
@@ -66,11 +68,13 @@ cvar.multiview<-function(x_list,
 # Helper Function to Perform Multiview CV for Each Pair of Alpha and Rho #
 ##########################################################################
 
-.cvfunc <- function(a_r, xmat, ymat, foldid, family)
+.cvfunc <- function(a_r, xmat, ymat, foldid, family, type.measure, verbose)
 {
   a<-as.numeric(sapply(strsplit(a_r, '_'), "[[" , 1))
   r<-as.numeric(sapply(strsplit(a_r, '_'), "[[" , 2))
-  multiview::cv.multiview(x_list = xmat, y = ymat, alpha = a, rho = r, family = family, foldid = foldid)
+  multiviewFit<-multiview::cv.multiview(x_list = xmat, y = ymat, alpha = a, rho = r, family = family, foldid = foldid, type.measure = type.measure)
+  if(verbose) cat('Multiview CV completed for alpha_rho:', a_r, "\n")
+  return(multiviewFit)
 }
 
 ############################################################################################
