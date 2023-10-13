@@ -109,3 +109,60 @@ coef_ordered(fit3, s=DD3$opt_lambda, alpha = DD3$opt_alpha, rho = DD3$opt_rho)
 
 # Make predictions
 predict(fit3, newx = list(x[1:5, ],z[1:5,]), s=DD3$opt_lambda, alpha = DD3$opt_alpha, rho = DD3$opt_rho, type = "response")
+
+###################################
+# Toy Example (IntegratedLearner) #
+###################################
+
+library(IntegratedLearner)
+library(SuperLearner)
+library(tidyverse)
+
+################################
+# Prepare dataset in IL format #
+################################
+
+# Sample_metadata (Must have variables Y, subjectID, and rownames)
+sample_metadata<-as.data.frame(by)
+colnames(sample_metadata)<-'Y'
+sample_metadata$subjectID<-paste('Subject', 1:nrow(sample_metadata), sep = '_')
+rownames(sample_metadata)<-sample_metadata$subjectID
+
+# Feature table (features in rows and samples in columns)
+feature_table_t<-as.data.frame(Reduce(cbind, x_list))
+feature_table<-as.data.frame(t(feature_table_t))
+colnames(feature_table)<-paste('Subject', 1:ncol(feature_table), sep = '_')
+rownames(feature_table)<-c(paste('View_1_Feature_', 1:20, sep = ''), paste('View_2_Feature_', 1:20, sep = ''))
+
+# Feature_metadata table
+rowID<-c(rep('View_1', 20), rep('View_2', 20))
+feature_metadata<-cbind.data.frame(featureID = rownames(feature_table), featureType = rowID)
+rownames(feature_metadata)<-rownames(feature_table)
+
+# Final sanity check
+all(rownames(feature_metadata)==rownames(feature_table))
+all(rownames(sample_metadata)==colnames(feature_table))
+
+########################################
+# Run IntegratedLearner (Default BART) #
+########################################
+
+IL_BART<-IntegratedLearner(feature_table,
+                  sample_metadata, 
+                  feature_metadata,
+                  family=binomial())
+                                    
+IL_BART$AUC.train
+
+##############################
+# Run IntegratedLearner (RF) #
+##############################
+
+IL_RF<-IntegratedLearner(feature_table,
+                      sample_metadata, 
+                      feature_metadata,
+                      base_learner = 'SL.randomForest',
+                      family=binomial())
+
+IL_RF$AUC.train
+
