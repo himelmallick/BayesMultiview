@@ -9,7 +9,7 @@
 
 library(InterSIM)
 library(tidyverse)
-library(splatter) # Bioconductor package if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager"); BiocManager::install("splatter")
+library(splatter) # Bioconductor package # if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager"); BiocManager::install("splatter")
 
 gen_simmba<-function(nsample, # Sample size
                      snr = 1, # Signal to noise ratio
@@ -108,6 +108,7 @@ gen_simmba<-function(nsample, # Sample size
   return(list(trainDat = trainDat,
               testDat = testDat,
               snr = snr,
+              beta0 = beta0,
               p.train = p.train,
               de.prob = de.prob,
               de.downProb = de.downProb, 
